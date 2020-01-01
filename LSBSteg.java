@@ -9,6 +9,8 @@ public final class LSBSteg implements Steganography {
     private static final int MAGIC_NUM = 0x53544547;
     /* Default amount of bytes needed for preprocessing. */
     private static final int USED_BYTES = 33;
+    private static final int ONE_BIT = 8;
+    private static final int TWO_BITS = 4;
 
     /* Ensure that this class cannot be instantiated. */
     private LSBSteg() {}
@@ -19,10 +21,10 @@ public final class LSBSteg implements Steganography {
     private static int bitsPerByte(byte[] bytes, String message) {
         int len = message.length();
         /* Can we fit 1 bit per byte? */
-        if(len * 8 <= bytes.length - USED_BYTES)
+        if(len * ONE_BIT <= bytes.length - USED_BYTES)
             return 1;
         /* If not 1, can we fit 2 bits per byte? */
-        if(len * 4 <= bytes.length - USED_BYTES)
+        if(len * TWO_BITS <= bytes.length - USED_BYTES)
             return 2;
         /* Won't fit. */
         return 0;
@@ -38,9 +40,9 @@ public final class LSBSteg implements Steganography {
 
     private static void writeInteger(byte[] bytes, int val, int offset) {
         int bitmask = 0xC0000000;
-        for(int i = 0; i < 16; ++i) {
-            byte currByte = bytes[i + offset];
-            bytes[i + offset] = ((val & bitmask) >>> (32 - (2 * (i + 1)))) | currByte; // confusing, fix later
+        for(int i = 1; i <= 16; ++i) {
+            byte currByte = bytes[i - 1 + offset];
+            bytes[i + offset] = (byte) ((val & bitmask) >>> (32 - 2 * i)) | currByte; // confusing, fix later
             bitmask = bitmask >>> 2;
         }
     }
