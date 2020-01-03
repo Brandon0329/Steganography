@@ -79,9 +79,14 @@ public final class LSBSteg implements Steganography {
     }
 
     // Might need to throw something here
-    private static boolean createPNG(byte[] bytes) {
+    // Should work for now. Maybe generate random number instead of using STEG suffix
+    private static boolean createPNG(byte[] bytes, String srcFile, String destFile) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         BufferedImage img = ImageIO.read(bis);
+        if(destFile == null)
+            destFile = srcFile.substring(0, srcFile.lastIndexOf('.')) + "STEG.png";
+        ImageIO.write(img, "png", new File(destFile));
+        return true;
     }
 
     // Use ImageIO.write() to create steganographic image from new buffer
@@ -96,7 +101,7 @@ public final class LSBSteg implements Steganography {
         // write bits value here
         writeMessageSize(bytes, message.length());
         writeMessage(bytes, message, USED_BYTES, bits);
-        if(!createPNG(bytes))
+        if(!createPNG(bytes, srcFile, destFile))
             return false;
         // convert bytes array to new PNG image named destFile or some default name if destFile is null
         return true;
