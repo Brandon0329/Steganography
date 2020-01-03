@@ -15,8 +15,8 @@ public final class LSBSteg implements Steganography {
     /* Ensure that this class cannot be instantiated. */
     private LSBSteg() {}
 
-    // Write magic number using 2 bits per byte, then change two bits to represent
-    // how many bits per byte to hide the message in the picture with, then hide message.
+    // Write magic number using 2 bits per byte, then change two bits to represent how many bits
+    // per byte to hide the message in the picture with, then write message size, then hide message.
     // ignoring the case where the image has a 4th byte in each pixel for the alpha value.
     private static int bitsPerByte(byte[] bytes, String message) {
         int len = message.length();
@@ -38,12 +38,26 @@ public final class LSBSteg implements Steganography {
         writeInteger(bytes, MAGIC_NUM, 0);
     }
 
+    // Optimize later
     private static void writeInteger(byte[] bytes, int val, int offset) {
-        int bitmask = 0xC0000000;
         for(int i = 1; i <= 16; ++i) {
             byte currByte = bytes[i - 1 + offset];
-            bytes[i + offset] = (byte) ((val & bitmask) >>> (32 - 2 * i)) | currByte; // confusing, fix later
-            bitmask = bitmask >>> 2;
+            bytes[i - 1 + offset] = (currByte & 0xFC) | (byte) (val >>> 30);
+            val <<= 2;
+        }
+    }
+
+    // Optimize later
+    private static void writeMessage(byte[] bytes, String message, int offset, int bitsPerByte) {
+        byte bitmask = bitsPerByte == 2 ? 0xFC : 0xFE;
+        byte[] messageBytes = message.getBytes();
+        for(byte b: messageBytes) {
+            for(int i = 8; i > 0; i -= bitsPerByte) {
+                byte currByte = bytes[offset];
+                bytes[offset] = (currByte & bitmask) | (b >>> (8 - bitsPerByte));
+                ++offset;
+                b <<= bitsPerByte;
+            }
         }
     }
 
@@ -64,6 +78,12 @@ public final class LSBSteg implements Steganography {
         return bytes; 
     }
 
+    // Might need to throw something here
+    private static boolean createPNG(byte[] bytes) {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        BufferedImage img = ImageIO.read(bis);
+    }
+
     // Use ImageIO.write() to create steganographic image from new buffer
     @Override
     public static boolean hideMessage(String message, String srcFile, String destFile) throws IOException {
@@ -75,6 +95,10 @@ public final class LSBSteg implements Steganography {
         writeMagic(bytes);
         // write bits value here
         writeMessageSize(bytes, message.length());
+        writeMessage(bytes, message, USED_BYTES, bits);
+        if(!createPNG(bytes))
+            return false;
+        // convert bytes array to new PNG image named destFile or some default name if destFile is null
         return true;
     }
 

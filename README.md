@@ -1,2 +1,2 @@
 # Steganography
-Stegranography desktop application
+Steganography desktop application
