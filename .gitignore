@@ -1,1 +1,7 @@
 *.class
+*.jpeg
+*.png
+JavaFXTest.java
+StegTest.java
+*.project
+*.classpath

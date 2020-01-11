@@ -1,4 +1,6 @@
+import java.io.IOException;
+
 public interface Steganography {
-    public static boolean hideMessage(String message, String filePath, String destFile);
-    public static String revealMessage(String filePath, String destFile);
+    public boolean hideMessage(String message, String filePath, String destFile) throws IOException;
+    public String revealMessage(String filePath, String destFile) throws IOException;
 }

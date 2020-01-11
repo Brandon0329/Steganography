@@ -3,8 +3,6 @@
 
 import java.awt.image.*;
 import java.io.*;
-import java.util.Arrays;
-import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 public final class LSBSteg implements Steganography {
@@ -15,13 +13,12 @@ public final class LSBSteg implements Steganography {
     private static final int ONE_BIT = 8;
     private static final int TWO_BITS = 4;
 
-    /* Ensure that this class cannot be instantiated. */
-    private LSBSteg() {}
+    public LSBSteg() {}
 
     // Write magic number using 2 bits per byte, then change two bits to represent how many bits
     // per byte to hide the message in the picture with, then write message size, then hide message.
     // ignoring the case where the image has a 4th byte in each pixel for the alpha value.
-    private static int bitsPerByte(byte[] bytes, String message) {
+    private int bitsPerByte(byte[] bytes, String message) {
         int len = message.length();
         /* Can we fit 1 bit per byte? */
         if(len * ONE_BIT <= bytes.length - USED_BYTES)
@@ -34,16 +31,16 @@ public final class LSBSteg implements Steganography {
     }
 
     // Maybe get rid of this and the next method. Unnecessary
-    private static void writeMessageSize(byte[] bytes, int size) {
+    private void writeMessageSize(byte[] bytes, int size) {
         writeInteger(bytes, size, USED_BYTES - 16);
     }
 
-    private static void writeMagic(byte[] bytes) {
+    private void writeMagic(byte[] bytes) {
         writeInteger(bytes, MAGIC_NUM, 0);
     }
 
     // Optimize later
-    private static void writeInteger(byte[] bytes, int val, int offset) {
+    private void writeInteger(byte[] bytes, int val, int offset) {
         for(int i = 1; i <= 16; ++i) {
             byte currByte = bytes[i - 1 + offset];
             bytes[i - 1 + offset] = (byte) ((currByte & 0xFC) | (val >>> 30));
@@ -52,7 +49,7 @@ public final class LSBSteg implements Steganography {
     }
 
     // Optimize later
-    private static void writeMessage(byte[] bytes, String message, int offset, int bitsPerByte) {
+    private void writeMessage(byte[] bytes, String message, int offset, int bitsPerByte) {
         int bitmask = bitsPerByte == 2 ? 0xFC : 0xFE;
         for(byte b: message.getBytes()) {
             for(int i = 8; i > 0; i -= bitsPerByte) {
@@ -64,11 +61,11 @@ public final class LSBSteg implements Steganography {
         }
     }
 
-    private static boolean verifyMagicNumber(byte[] bytes) {
+    private boolean verifyMagicNumber(byte[] bytes) {
         return readInteger(bytes, 0) == MAGIC_NUM;
     }
 
-    private static int readInteger(byte[] bytes, int offset) {
+    private int readInteger(byte[] bytes, int offset) {
         int num = 0;
         for(int i = 1; i <= 16; ++i) {
             int twoBits = bytes[i - 1 + offset] & 0x3;
@@ -77,7 +74,7 @@ public final class LSBSteg implements Steganography {
         return num;
     }
 
-    private static String readMessage(byte[] bytes, int offset, int bitsPerByte, int messageSize) {
+    private String readMessage(byte[] bytes, int offset, int bitsPerByte, int messageSize) {
         StringBuilder sb = new StringBuilder();
         int bitmask = bitsPerByte == 2 ? 0x3 : 0x1;
         for(int i = 0; i < messageSize; ++i) {
@@ -92,7 +89,7 @@ public final class LSBSteg implements Steganography {
         return sb.toString();
     }
 
-    private static byte[] getBytes(BufferedImage img) {
+    private byte[] getBytes(BufferedImage img) {
         WritableRaster raster = img.getRaster();
         DataBufferByte buf = (DataBufferByte) raster.getDataBuffer();
         byte[] byteBuf = buf.getData();
@@ -104,7 +101,7 @@ public final class LSBSteg implements Steganography {
     // Might need to throw something here or use a try/catch block
     // Should work for now. Maybe generate random number instead of using STEG suffix
     // Also do some error checking
-    private static boolean createPNG(byte[] bytes, String srcFile, String destFile) throws IOException {
+    private boolean createPNG(byte[] bytes, String srcFile, String destFile) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         BufferedImage img = ImageIO.read(bis);
         if(destFile == null || destFile.trim().length() == 0)
@@ -114,14 +111,14 @@ public final class LSBSteg implements Steganography {
     }
 
     @Override
-    public static boolean hideMessage(String message, String srcFile, String destFile) throws IOException {
+    public boolean hideMessage(String message, String srcFile, String destFile) throws IOException {
         BufferedImage img = ImageIO.read(new File(srcFile));
         byte[] bytes = getBytes(img);
         int bits = bitsPerByte(bytes, message);
         if(bits <= 0)
             return false;
         writeMagic(bytes);
-        bytes[16] = (byte) (bytes[16] & 0xFC) | bitsPerByte;
+        bytes[16] = (byte) ((bytes[16] & 0xFC) | bits);
         writeMessageSize(bytes, message.length());
         writeMessage(bytes, message, USED_BYTES, bits);
         if(!createPNG(bytes, srcFile, destFile))
@@ -130,7 +127,7 @@ public final class LSBSteg implements Steganography {
     }
 
     @Override
-    public static String revealMessage(String srcFile, String destFile) throws IOException {
+    public String revealMessage(String srcFile, String destFile) throws IOException {
         BufferedImage img = ImageIO.read(new File(srcFile));
         byte[] bytes = getBytes(img);
         if(!verifyMagicNumber(bytes))
