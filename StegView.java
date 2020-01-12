@@ -38,41 +38,41 @@ public class StegView extends Application {
 	public StegView() {
     	// Init GridPanes
 		mainGrid = new GridPane();
-        mainGrid.setHgap(15);
-        mainGrid.setVgap(15);
-        mainGrid.setPadding(new Insets(25, 25, 25, 25));
-        mainGrid.setAlignment(Pos.CENTER);
-        
-        hideGrid = new GridPane();
+		mainGrid.setHgap(15);
+		mainGrid.setVgap(15);
+		mainGrid.setPadding(new Insets(25, 25, 25, 25));
+		mainGrid.setAlignment(Pos.CENTER);
+
+		hideGrid = new GridPane();
 //        hideGrid.setGridLinesVisible(true);
-        hideGrid.setHgap(10);
-        hideGrid.setVgap(10);
-        hideGrid.setPadding(new Insets(25, 35, 25, 25));
-        hideGrid.setAlignment(Pos.CENTER);
-        
-        extractGrid = new GridPane();
-        extractGrid.setAlignment(Pos.CENTER);
+		hideGrid.setHgap(10);
+		hideGrid.setVgap(10);
+		hideGrid.setPadding(new Insets(25, 35, 25, 25));
+		hideGrid.setAlignment(Pos.CENTER);
+
+		extractGrid = new GridPane();
+		extractGrid.setAlignment(Pos.CENTER);
     }
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		// Init Buttons
-        startButton = new Button("Start");
-        exitButton = new Button("Exit");
-        hideImageButton = new Button("Browse");
-        hideImageButton.setMinWidth(84);
-        hideMessageButton = new Button("Select file");
-        hideMessageButton.setDisable(true);
-        hideButton = new Button("Hide message");
-        hideButton.setMinSize(100, 50);
-        hideButton.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, 15));
-        
-        // Init TextField
-        imageField = new TextField();
-        
-        // Init TextArea
-        messageArea = new TextArea();
-		
+		startButton = new Button("Start");
+		exitButton = new Button("Exit");
+		hideImageButton = new Button("Browse");
+		hideImageButton.setMinWidth(84);
+		hideMessageButton = new Button("Select file");
+		hideMessageButton.setDisable(true);
+		hideButton = new Button("Hide message");
+		hideButton.setMinSize(100, 50);
+		hideButton.setFont(Font.font(Font.getDefault().getName(), FontWeight.EXTRA_BOLD, 15));
+
+		// Init TextField
+		imageField = new TextField();
+
+		// Init TextArea
+		messageArea = new TextArea();
+
 		// Set up mainGrid
 		Text title = new Text("NsidSteg 1.0");
 		HBox titleBox = new HBox();
