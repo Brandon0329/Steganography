@@ -35,9 +35,9 @@ public class StegView extends Application {
 //	private ImageView beforeImage, afterImage;
 
 	// BUTTONS, FIELDS, ETC MUST BE INIT WITHIN START METHOD
-    public StegView() {
+	public StegView() {
     	// Init GridPanes
-        mainGrid = new GridPane();
+		mainGrid = new GridPane();
         mainGrid.setHgap(15);
         mainGrid.setVgap(15);
         mainGrid.setPadding(new Insets(25, 25, 25, 25));
