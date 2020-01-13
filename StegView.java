@@ -23,13 +23,13 @@ import javafx.stage.Stage;
 
 public class StegView extends Application {
 	private static final int IMG_WIDTH = 400;
-	private static final int IMG_HEIGHT = 300;
+	private static final int IMG_HEIGHT = 225;
 	private static final int WIDTH = 1200;
 	private static final int HEIGHT = 900;
 	
 	private GridPane mainGrid, hideGrid, extractGrid;
 	private Button startButton, exitButton, hideImageButton, hideMessageButton, hideButton, resetButton;
-	private TextField imageField;
+	private TextField imageField, nameImageField;
 	private TextArea messageArea;
 //	private Rectangle beforeRect, afterRect;
 //	private ImageView beforeImage, afterImage;
@@ -47,12 +47,12 @@ public class StegView extends Application {
 //        hideGrid.setGridLinesVisible(true);
 		hideGrid.setHgap(10);
 		hideGrid.setVgap(10);
-		hideGrid.setPadding(new Insets(25, 35, 25, 25));
+		hideGrid.setPadding(new Insets(15, 35, 15, 25));
 		hideGrid.setAlignment(Pos.CENTER);
 
 		extractGrid = new GridPane();
 		extractGrid.setAlignment(Pos.CENTER);
-    }
+	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -69,6 +69,8 @@ public class StegView extends Application {
 
 		// Init TextField
 		imageField = new TextField();
+		nameImageField = new TextField();
+		nameImageField.setDisable(true);
 
 		// Init TextArea
 		messageArea = new TextArea();
@@ -115,7 +117,7 @@ public class StegView extends Application {
 		
 		/* Set up hideGrid */
 		Text hideTitle = new Text("Hide a message");
-		hideTitle.setFont(Font.font("Consolas", 30));
+		hideTitle.setFont(Font.font("Consolas", 25));
 		hideGrid.add(hideTitle, 0, 0, 2, 1);
 		
 		Label imageLabel = new Label("Select image:");
@@ -124,12 +126,25 @@ public class StegView extends Application {
 		
 		Label messageLabel = new Label("Write message:");
 		messageLabel.setWrapText(true);
-		hideGrid.add(messageLabel, 0, 2);
+		hideGrid.add(messageLabel, 0, 3);
+		
+		Label nameImageLabel = new Label("Provide output image name:");
+		nameImageLabel.setWrapText(true);
+		hideGrid.add(nameImageLabel, 0, 5);
+		
+		Label inputLabel = new Label("Input Image:");
+		inputLabel.setFont(Font.font("Consolas", FontWeight.BOLD, Font.getDefault().getSize()));
+		hideGrid.add(inputLabel, 3, 2);
+		
+		Label outputLabel = new Label("Output Image:");
+		outputLabel.setFont(Font.font("Consolas", FontWeight.BOLD, Font.getDefault().getSize()));
+		hideGrid.add(outputLabel, 3, 4);
 		
 		hideGrid.add(imageField, 1, 1);
-		hideGrid.add(messageArea, 1, 2);
+		hideGrid.add(messageArea, 1, 3);
+		hideGrid.add(nameImageField, 1, 5);
 		hideGrid.add(hideImageButton, 2, 1);
-		hideGrid.add(hideMessageButton, 2, 2);
+		hideGrid.add(hideMessageButton, 2, 3);
 		
 		// Place CheckBox
 		CheckBox fileCheckBox = new CheckBox("Use .txt file");
@@ -142,7 +157,20 @@ public class StegView extends Application {
 				hideMessageButton.setDisable(true);
 		});
 		fileBox.getChildren().add(fileCheckBox);
-		hideGrid.add(fileBox, 1, 3);
+		hideGrid.add(fileBox, 1, 4);
+		
+		// Place another CheckBox for file naming
+		CheckBox nameCheckBox = new CheckBox("Change name");
+		HBox nameBox = new HBox();
+		nameBox.setAlignment(Pos.BOTTOM_RIGHT);
+		nameCheckBox.setOnAction((ActionEvent e) -> {
+			if(nameCheckBox.isSelected())
+				nameImageField.setDisable(false);
+			else
+				nameImageField.setDisable(true);
+		});
+		nameBox.getChildren().add(nameCheckBox);
+		hideGrid.add(nameBox, 1, 6);
 		
 		Rectangle beforeRect = new Rectangle(IMG_WIDTH, IMG_HEIGHT);
 		beforeRect.setStroke(Color.BLACK);
@@ -152,12 +180,12 @@ public class StegView extends Application {
 		Rectangle afterRect = new Rectangle(IMG_WIDTH, IMG_HEIGHT);
 		afterRect.setStroke(Color.BLACK);
 		afterRect.setFill(Color.TRANSPARENT);
-		hideGrid.add(afterRect, 3, 2);
+		hideGrid.add(afterRect, 3, 3);
 		
 		HBox hideBox = new HBox();
 		hideBox.setAlignment(Pos.BOTTOM_RIGHT);
 		hideBox.getChildren().add(hideButton);
-		hideGrid.add(hideBox, 1, 5);
+		hideGrid.add(hideBox, 1, 11);
 		
 		/* Set up extractGrid */
 		Text extractText = new Text("Extract a message");
@@ -172,5 +200,17 @@ public class StegView extends Application {
 		
 		pane.getTabs().addAll(hideTab, extractTab);
 		return pane;
+	}
+	
+	public String getImagePath() {
+		return imageField.getText();
+	}
+	
+	public String getMessage() {
+		return messageArea.getText();
+	}
+	
+	public String getImageName() {
+		return nameImageField.getText();
 	}
 }
