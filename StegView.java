@@ -1,6 +1,9 @@
 
+import java.io.IOException;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -28,9 +31,10 @@ public class StegView extends Application {
 	private static final int HEIGHT = 900;
 	
 	private GridPane mainGrid, hideGrid, extractGrid;
-	private Button startButton, exitButton, hideImageButton, hideMessageButton, hideButton, resetButton;
+	private Button startButton, exitButton, hideImageButton, hideMessageButton, hideButton/*, resetButton */;
 	private TextField imageField, nameImageField;
 	private TextArea messageArea;
+	private EventHandler<ActionEvent> hideHandler, revealHandler;
 //	private Rectangle beforeRect, afterRect;
 //	private ImageView beforeImage, afterImage;
 
@@ -183,6 +187,16 @@ public class StegView extends Application {
 		hideGrid.add(afterRect, 3, 3);
 		
 		HBox hideBox = new HBox();
+		hideButton.setOnAction((ActionEvent e) -> {
+			try {
+				if(!StegController.hide(getMessage(), getImagePath(), getImageName()))
+					throw new IOException();
+				// Place output image in UI
+			} catch (IOException e1) {
+				// Print something to UI. Change later
+				System.out.println("Something went wrong");
+			}
+		});
 		hideBox.setAlignment(Pos.BOTTOM_RIGHT);
 		hideBox.getChildren().add(hideButton);
 		hideGrid.add(hideBox, 1, 11);
@@ -212,5 +226,13 @@ public class StegView extends Application {
 	
 	public String getImageName() {
 		return nameImageField.getText();
+	}
+	
+	public void setHideButtonHandler(EventHandler<ActionEvent> handler) {
+		hideHandler = handler;
+	}
+	
+	public void setRevealButtonHandler(EventHandler<ActionEvent> handler) {
+		revealHandler = handler;
 	}
 }

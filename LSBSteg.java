@@ -112,6 +112,8 @@ public final class LSBSteg implements Steganography {
 
     @Override
     public boolean hideMessage(String message, String srcFile, String destFile) throws IOException {
+    	if(message.length() == 0 || srcFile.length() == 0)
+    		return false;
         BufferedImage img = ImageIO.read(new File(srcFile));
         byte[] bytes = getBytes(img);
         int bits = bitsPerByte(bytes, message);
