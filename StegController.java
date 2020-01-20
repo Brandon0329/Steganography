@@ -1,19 +1,17 @@
-import java.io.IOException;
-
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;;
 
 public class StegController {
-	private static final Steganography theModel = new LSBSteg();
+	private static final Steganography stegUtil = new LSBSteg();
 	
 	private StegController() {}
 	
-	public static boolean hide(String message, String filePath, String destFile) throws IOException {
-		return theModel.hideMessage(message, filePath, destFile);
+	public static BufferedImage hide(String message, File filePath, String destFile) throws IOException {
+		return stegUtil.hideMessage(message, filePath, destFile);
 	}
 	
-	public static String reveal(String filePath, String destFile) throws IOException {
-		return theModel.revealMessage(filePath, destFile);
+	public static String reveal(File filePath, String destFile) throws IOException {
+		return stegUtil.revealMessage(filePath, destFile);
 	}
 }

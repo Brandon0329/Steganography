@@ -1,9 +1,10 @@
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,6 +15,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -22,6 +24,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class StegView extends Application {
@@ -34,7 +37,7 @@ public class StegView extends Application {
 	private Button startButton, exitButton, hideImageButton, hideMessageButton, hideButton/*, resetButton */;
 	private TextField imageField, nameImageField;
 	private TextArea messageArea;
-	private EventHandler<ActionEvent> hideHandler, revealHandler;
+	private File currentFile = null;
 //	private Rectangle beforeRect, afterRect;
 //	private ImageView beforeImage, afterImage;
 
@@ -98,7 +101,7 @@ public class StegView extends Application {
 		startBox.setAlignment(Pos.CENTER);
 		startBox.getChildren().add(startButton);
 		startButton.setOnAction((ActionEvent e) -> {
-			primaryStage.setScene(new Scene(setupTabPane(), WIDTH, HEIGHT));
+			primaryStage.setScene(new Scene(setupTabPane(primaryStage), WIDTH, HEIGHT));
 		});
 		mainGrid.add(startBox, 0, 2);
 		
@@ -116,7 +119,7 @@ public class StegView extends Application {
 		primaryStage.show();
 	}
 	
-	private TabPane setupTabPane() {
+	private TabPane setupTabPane(Stage primaryStage) {
 		TabPane pane = new TabPane();
 		
 		/* Set up hideGrid */
@@ -148,6 +151,7 @@ public class StegView extends Application {
 		hideGrid.add(messageArea, 1, 3);
 		hideGrid.add(nameImageField, 1, 5);
 		hideGrid.add(hideImageButton, 2, 1);
+		
 		hideGrid.add(hideMessageButton, 2, 3);
 		
 		// Place CheckBox
@@ -170,11 +174,27 @@ public class StegView extends Application {
 		nameCheckBox.setOnAction((ActionEvent e) -> {
 			if(nameCheckBox.isSelected())
 				nameImageField.setDisable(false);
-			else
+			else {
 				nameImageField.setDisable(true);
+				if(currentFile != null)
+					nameImageField.setText(createNewImgString(currentFile.toString()));
+			}
 		});
 		nameBox.getChildren().add(nameCheckBox);
 		hideGrid.add(nameBox, 1, 6);
+		
+		
+		hideImageButton.setOnAction((ActionEvent e) -> {
+			currentFile = new FileChooser().showOpenDialog(primaryStage);
+			imageField.setText(currentFile.toString());
+			nameImageField.clear();
+			if(!nameCheckBox.isSelected())
+				nameImageField.setText(createNewImgString(imageField.getText()));
+			ImageView imageView = new ImageView(new Image("file:///" + currentFile.toString()));
+			imageView.setFitWidth(IMG_WIDTH);
+			imageView.setFitHeight(IMG_HEIGHT);
+			hideGrid.add(imageView, 3, 1);
+		});
 		
 		Rectangle beforeRect = new Rectangle(IMG_WIDTH, IMG_HEIGHT);
 		beforeRect.setStroke(Color.BLACK);
@@ -189,12 +209,14 @@ public class StegView extends Application {
 		HBox hideBox = new HBox();
 		hideButton.setOnAction((ActionEvent e) -> {
 			try {
-				if(!StegController.hide(getMessage(), getImagePath(), getImageName()))
+				BufferedImage newImage = StegController.hide(getMessage(), currentFile, getImageName());
+				if(newImage == null)
 					throw new IOException();
 				// Place output image in UI
 			} catch (IOException e1) {
 				// Print something to UI. Change later
 				System.out.println("Something went wrong");
+				e1.printStackTrace();
 			}
 		});
 		hideBox.setAlignment(Pos.BOTTOM_RIGHT);
@@ -216,8 +238,11 @@ public class StegView extends Application {
 		return pane;
 	}
 	
-	public String getImagePath() {
-		return imageField.getText();
+	private String createNewImgString(String imgName) {
+		String dir = imgName.substring(0, imgName.lastIndexOf('\\') + 1);
+		String file = imgName.substring(dir.length());
+		int rand = (int) (Math.random() * 1_000_000);
+		return dir + file.substring(0, file.lastIndexOf('.')) + rand + ".png";
 	}
 	
 	public String getMessage() {
@@ -226,13 +251,5 @@ public class StegView extends Application {
 	
 	public String getImageName() {
 		return nameImageField.getText();
-	}
-	
-	public void setHideButtonHandler(EventHandler<ActionEvent> handler) {
-		hideHandler = handler;
-	}
-	
-	public void setRevealButtonHandler(EventHandler<ActionEvent> handler) {
-		revealHandler = handler;
 	}
 }
