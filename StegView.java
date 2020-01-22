@@ -8,6 +8,8 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -212,11 +214,23 @@ public class StegView extends Application {
 				BufferedImage newImage = StegController.hide(getMessage(), currentFile, getImageName());
 				if(newImage == null)
 					throw new IOException();
-				// Place output image in UI
+				
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setTitle("Message Hidden");
+				alert.setHeaderText(null);
+				alert.setContentText("Message successfully hidden. Press OK to continue");
+				alert.showAndWait();
+				
+				ImageView image = new ImageView(new Image("file:///" + getImageName()));
+				image.setFitWidth(IMG_WIDTH);
+				image.setFitHeight(IMG_HEIGHT);
+				hideGrid.add(image, 3, 3);
 			} catch (IOException e1) {
-				// Print something to UI. Change later
-				System.out.println("Something went wrong");
-				e1.printStackTrace();
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Steganography Error");
+				alert.setHeaderText(null);
+				alert.setContentText("There was an error hiding the message!");
+				alert.showAndWait();
 			}
 		});
 		hideBox.setAlignment(Pos.BOTTOM_RIGHT);
@@ -227,6 +241,27 @@ public class StegView extends Application {
 		Text extractText = new Text("Extract a message");
 		extractText.setFont(Font.font("Consolas", 30));
 		extractGrid.add(extractText, 0, 0);
+		
+		TextArea area = new TextArea();
+		extractGrid.add(area, 0, 1);
+		
+		Button button = new Button("Extract");
+		button.setOnAction((ActionEvent e) -> {
+			File file = new FileChooser().showOpenDialog(primaryStage);
+			try {
+				String message = StegController.reveal(file, null);
+				if(message.length() == 0)
+					throw new IOException();
+				area.setText(message);
+			} catch (IOException e1) {
+				Alert alert = new Alert(AlertType.WARNING);
+				alert.setTitle("No Message Found");
+				alert.setHeaderText(null);
+				alert.setContentText("No message found in this image.");
+				alert.showAndWait();
+			}
+		});
+		extractGrid.add(button, 0, 2);
 		
 		Tab hideTab = new Tab("Hide", hideGrid);
 		hideTab.setClosable(false);
