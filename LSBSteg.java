@@ -4,10 +4,10 @@ import java.io.*;
 import javax.imageio.ImageIO;
 
 public final class LSBSteg implements Steganography {
-	private static final int[] ONE_BIT_MASKS = {0xFFFEFFFF, 0xFFFFFEFF, 0xFFFFFFFE};
+    private static final int[] ONE_BIT_MASKS = {0xFFFEFFFF, 0xFFFFFEFF, 0xFFFFFFFE};
     private static final int[] TWO_BIT_MASKS = {0xFFFCFFFF, 0xFFFFFCFF, 0xFFFFFFFC};
-    private static final int USED_BYTES 	 = 33;
-    private static final int MAGIC_NUM  	 = 0x53544547;
+    private static final int USED_BYTES	     = 33;
+    private static final int MAGIC_NUM       = 0x53544547;
 
     private int bitsPerByte(BufferedImage img, int len) {
     	final int bytesAvailable = img.getWidth() * img.getHeight() * 3;
@@ -26,41 +26,41 @@ public final class LSBSteg implements Steganography {
     	return offset / (img.getWidth() * 3);
     }
     
-	private byte[] getByteArrayFromInt(int num) {
-		byte[] arr = new byte[4];
-		int bitmask = 0xFF;
-		arr[0] = (byte) ((num >>> 24) & bitmask);
-		arr[1] = (byte) ((num >>> 16) & bitmask);
-		arr[2] = (byte) ((num >>> 8)  & bitmask);
-		arr[3] = (byte) ( num		  & bitmask);
-		return arr;
-	}
+    private byte[] getByteArrayFromInt(int num) {
+	byte[] arr = new byte[4];
+	int bitmask = 0xFF;
+	arr[0] = (byte) ((num >>> 24) & bitmask);
+	arr[1] = (byte) ((num >>> 16) & bitmask);
+	arr[2] = (byte) ((num >>> 8)  & bitmask);
+	arr[3] = (byte) ( num		  & bitmask);
+	return arr;
+    }
 
     private int writeByte(BufferedImage img, byte b, int bitsPerByte, int offset) {
-		int x = getX(img, offset);
-		int y = getY(img, offset);
-		int pixel = img.getRGB(x, y);
-		int bitmask = bitsPerByte == 1 ? 0x1 : 0x3;
-		int[] pixelmasks = bitsPerByte == 1 ? ONE_BIT_MASKS : TWO_BIT_MASKS;
-		for(int i = 8 - bitsPerByte; i >= 0; i -= bitsPerByte) {
-			int bits = (b >>> i) & bitmask;
-			int index = offset % 3;
-			pixel = (pixel & pixelmasks[index]) | (bits << ((2 - index) * 8));
-			if(index == 2) {
-				img.setRGB(x, y, pixel);
-				x = getX(img, offset + 1);
-				y = getY(img, offset + 1);
-				pixel = img.getRGB(x, y);
-			}
-			++offset;
+	int x = getX(img, offset);
+	int y = getY(img, offset);
+	int pixel = img.getRGB(x, y);
+	int bitmask = bitsPerByte == 1 ? 0x1 : 0x3;
+	int[] pixelmasks = bitsPerByte == 1 ? ONE_BIT_MASKS : TWO_BIT_MASKS;
+	for(int i = 8 - bitsPerByte; i >= 0; i -= bitsPerByte) {
+		int bits = (b >>> i) & bitmask;
+		int index = offset % 3;
+		pixel = (pixel & pixelmasks[index]) | (bits << ((2 - index) * 8));
+		if(index == 2) {
+			img.setRGB(x, y, pixel);
+			x = getX(img, offset + 1);
+			y = getY(img, offset + 1);
+			pixel = img.getRGB(x, y);
 		}
-		img.setRGB(x, y, pixel);
-		return offset;
+		++offset;
+	}
+	img.setRGB(x, y, pixel);
+	return offset;
     }
     
     private void writeInteger(BufferedImage img, int num, int offset) {
-		for(byte b: getByteArrayFromInt(num))
-			offset = writeByte(img, b, 2, offset);
+	for(byte b: getByteArrayFromInt(num))
+		offset = writeByte(img, b, 2, offset);
     }
     
     private void writeBitsPerByteVal(BufferedImage img, int bitsPerByte, int offset) {
@@ -71,8 +71,8 @@ public final class LSBSteg implements Steganography {
     }
     
     private void writeMessage(BufferedImage img, byte[] message, int bitsPerByte, int offset) {
-		for(byte b: message)
-			offset = writeByte(img, b, bitsPerByte, offset);
+	for(byte b: message)
+		offset = writeByte(img, b, bitsPerByte, offset);
     }
     
     private int readByte(BufferedImage img, int bitsPerByte, int offset) {
