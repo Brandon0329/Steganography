@@ -32,7 +32,7 @@ public final class LSBSteg implements Steganography {
 	arr[0] = (byte) ((num >>> 24) & bitmask);
 	arr[1] = (byte) ((num >>> 16) & bitmask);
 	arr[2] = (byte) ((num >>> 8)  & bitmask);
-	arr[3] = (byte) ( num		  & bitmask);
+	arr[3] = (byte) ( num	      & bitmask);
 	return arr;
     }
 
