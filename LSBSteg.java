@@ -84,13 +84,13 @@ public final class LSBSteg implements Steganography {
     	for(int shift = 8 - bitsPerByte; shift >= 0; shift -= bitsPerByte) {
     		int index = offset % 3;
     		int bits = (pixel & ~pixelmasks[index]) >>> ((2 - index) * 8);
-			bite |= bits << shift;
-			if(index == 2) {
-				x = getX(img, offset + 1);
-				y = getY(img, offset + 1);
-				pixel = img.getRGB(x, y);
-			}
-			++offset;
+		bite |= bits << shift;
+		if(index == 2) {
+			x = getX(img, offset + 1);
+			y = getY(img, offset + 1);
+			pixel = img.getRGB(x, y);
+		}
+		++offset;
     	}
     	return bite;
     }
