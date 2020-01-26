@@ -1,7 +1,9 @@
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Scanner;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -154,6 +156,23 @@ public class StegView extends Application {
 		hideGrid.add(nameImageField, 1, 5);
 		hideGrid.add(hideImageButton, 2, 1);
 		
+		hideMessageButton.setOnAction((ActionEvent e) -> {
+			File file = new FileChooser().showOpenDialog(primaryStage);
+			try {
+				Scanner input = new Scanner(file);
+				StringBuilder text = new StringBuilder();
+				while(input.hasNextLine())
+					text.append(input.nextLine() + "\n");
+				messageArea.setText(text.toString());
+				input.close();
+			} catch (FileNotFoundException e1) {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error Opening Text File");
+				alert.setHeaderText(null);
+				alert.setContentText("Error opening .txt file");
+				alert.showAndWait();
+			}
+		});
 		hideGrid.add(hideMessageButton, 2, 3);
 		
 		// Place CheckBox
